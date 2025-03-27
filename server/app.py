@@ -46,6 +46,46 @@ class PlantByID(Resource):
     def get(self, id):
         plant = Plant.query.filter_by(id=id).first().to_dict()
         return make_response(jsonify(plant), 200)
+    
+
+    def patch(self, id):
+        # Retrieve the plant object based on ID
+        plant = Plant.query.filter_by(id=id).first()
+
+        # If plant is not found, return 404 error
+        if not plant:
+            return make_response({"message": "The method is not allowed for the requested URL."}, 404)
+
+        # Get the updated data from the request (which will be in JSON)
+        data = request.get_json()
+
+        # Update the attributes of the plant
+        for attr, value in data.items():
+            setattr(plant, attr, value)
+
+        # Commit the changes to the database
+        db.session.commit()
+
+        # Convert the updated plant object to a dictionary
+        updated_plant = plant.to_dict()
+
+        # Return the updated plant object as a JSON response
+        return make_response(updated_plant, 200)
+
+    
+
+    def delete(self, id):
+        plant = Plant.query.filter_by(id=id).first()
+
+        if not plant:
+            return make_response({"message": "Plant not found"}, 404)
+
+        db.session.delete(plant)
+        db.session.commit()
+
+
+        return make_response("", 200)
+
 
 
 api.add_resource(PlantByID, '/plants/<int:id>')
